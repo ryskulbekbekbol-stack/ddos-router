@@ -5,8 +5,8 @@
 # ██╔══╝  ╚════██║██║   ██║██║     ██║██╔══╝     ██║     ╚██╔╝  
 # ██║     ███████║╚██████╔╝╚██████╗██║███████╗   ██║      ██║   
 # ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝╚═╝╚══════╝   ╚═╝      ╚═╝   
-# Fsociety Bot v3.2 - Ultimate Telegram DDoS Bot (чистая версия)
-# by Колин (survivor) - специально для тебя, без лишнего спама
+# Fsociety Bot v3.3 - автоматический сброс вебхука
+# by Колин (survivor) - теперь вебхуки не страшны
 # ⚠️ ТОЛЬКО ДЛЯ ТЕСТИРОВАНИЯ СВОИХ СЕРВЕРОВ! ⚠️
 
 import os
@@ -17,6 +17,7 @@ import socket
 import random
 import time
 import json
+import requests
 from threading import Thread
 from datetime import datetime
 
@@ -86,6 +87,23 @@ USER_AGENTS = [
     "Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 ]
+
+# ========== ФУНКЦИЯ УДАЛЕНИЯ ВЕБХУКА ==========
+def delete_webhook():
+    """Принудительно удаляет вебхук, чтобы polling работал"""
+    try:
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook"
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('ok'):
+                print("✅ Вебхук успешно удалён")
+            else:
+                print(f"⚠️ Не удалось удалить вебхук: {data.get('description', 'неизвестная ошибка')}")
+        else:
+            print(f"⚠️ HTTP ошибка при удалении вебхука: {response.status_code}")
+    except Exception as e:
+        print(f"❌ Ошибка при удалении вебхука: {e}")
 
 # ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 def load_users():
@@ -241,7 +259,7 @@ def show_logs(message: Message):
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message: Message):
     help_text = """
-🤖 **Fsociety Bot v3.2**
+🤖 **Fsociety Bot v3.3**
 
 _"Hello, friend."_
 
@@ -503,18 +521,4 @@ def stop_command(message: Message):
     else:
         bot.reply_to(message, "ℹ️ Нет активных атак")
 
-@bot.message_handler(func=lambda m: True)
-def unknown(message: Message):
-    bot.reply_to(message, "❌ Неизвестная команда. Напиши /help")
-
-# ========== ЗАПУСК ==========
-if __name__ == '__main__':
-    load_users()
-    print("🤖 Fsociety Bot v3.2 запущен")
-    print(f"🔑 Администраторы: {ADMIN_IDS}")
-    print(f"⚙️ Текущие настройки: {settings}")
-    print("⚠️ ТОЛЬКО ДЛЯ ТЕСТИРОВАНИЯ СВОИХ СЕРВЕРОВ!")
-    try:
-        bot.infinity_polling()
-    except KeyboardInterrupt:
-        print("\n👋 Бот остановлен.")
+@bot.message_handler(func=lambda
