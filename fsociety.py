@@ -364,8 +364,9 @@ def attack(message: Message):
     except Exception as e:
         bot.reply_to(message, f"❌ Ошибка: {e}")
 
-@bot.message_handler(func=lambda m: True)
-def unknown(message: Message):
+# ========== ОБРАБОТЧИК НЕИЗВЕСТНЫХ КОМАНД (ТОЛЬКО ДЛЯ /) ==========
+@bot.message_handler(func=lambda m: m.text and m.text.startswith('/'))
+def unknown_command(message: Message):
     bot.reply_to(message, "❌ Неизвестная команда. Напиши /help")
 
 # ========== ЗАПУСК ==========
